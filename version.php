@@ -27,6 +27,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->component = 'local_boostnavigation';
 $plugin->version = 2019043000;
 $plugin->release = 'v3.6-r4';
-$plugin->requires = 2018120300;
+$plugin->requires = 2017111306;
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array('theme_boost' => 2018051300);
