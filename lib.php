@@ -272,7 +272,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         global_navigation::TYPE_CUSTOM,
                         null,
                         'localboostnavigationcoursesections',
-                        null);
+                        new pix_icon('i/section', '', 'core'));
                 // Prevent that the coursesections course node is marked as active and added to the breadcrumb when showing the
                 // course home page.
                 $coursesectionsnode->make_inactive();
@@ -376,29 +376,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
             core_collator::asort($modfullnames);
         }
     }
-
-    // Check if admin wants us to insert the resources node in Boost's nav drawer.
-    if (isset($config->insertresourcescoursenode) && $config->insertresourcescoursenode == true) {
-        // Only proceed if we are inside a course and we are _not_ on the frontpage.
-        if ($PAGE->context->get_course_context(false) == true && $COURSE->id != SITEID) {
-            // Only proceed if the course has at least one resource activity.
-            if (array_key_exists('resources', $modfullnames)) {
-                // Create resources course node.
-                $resourcesnode = navigation_node::create(get_string('resources'),
-                        new moodle_url('/course/resources.php', array('id' => $COURSE->id)),
-                        global_navigation::TYPE_ACTIVITY,
-                        null,
-                        'localboostnavigationresources',
-                        new pix_icon('resources', '', 'local_boostnavigation'));
-                // Add the activities node to the end of the course navigation.
-                $coursehomenode->add_node($resourcesnode);
-
-                // Remove the resources element from the modfullnames array to avoid that courses which only have resources get
-                // an empty activities node.
-                unset ($modfullnames['resources']);
-            }
-        }
-    }
+	
 
     // Check if admin wants us to insert the activities node in Boost's nav drawer.
     if (isset($config->insertactivitiescoursenode) && $config->insertactivitiescoursenode == true) {
@@ -416,7 +394,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         global_navigation::TYPE_CUSTOM,
                         null,
                         'localboostnavigationactivities',
-                        null);
+                        new pix_icon('activities', '', 'local_boostnavigation'));
                 // Prevent that the activities course node is marked as active and added to the breadcrumb when showing the
                 // course home page.
                 $activitiesnode->make_inactive();
@@ -448,7 +426,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                                 global_navigation::TYPE_ACTIVITY,
                                 null,
                                 'localboostnavigationactivity'.$modname,
-                                new pix_icon('activities', '', 'local_boostnavigation'));
+                                new pix_icon('icon', '', 'mod_'.$modname));
                         // Add the activity course node to the coursehome node.
                         $coursehomenode->add_node($activitynode);
                         // Remember the activity course node's key for collapsing it later.
@@ -497,6 +475,30 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
             }
         }
     }
+
+    // Check if admin wants us to insert the resources node in Boost's nav drawer.
+    if (isset($config->insertresourcescoursenode) && $config->insertresourcescoursenode == true) {
+        // Only proceed if we are inside a course and we are _not_ on the frontpage.
+        if ($PAGE->context->get_course_context(false) == true && $COURSE->id != SITEID) {
+            // Only proceed if the course has at least one resource activity.
+            if (array_key_exists('resources', $modfullnames)) {
+                // Create resources course node.
+                $resourcesnode = navigation_node::create(get_string('resources'),
+                        new moodle_url('/course/resources.php', array('id' => $COURSE->id)),
+                        global_navigation::TYPE_ACTIVITY,
+                        null,
+                        'localboostnavigationresources',
+                        new pix_icon('resources', '', 'local_boostnavigation'));
+                // Add the activities node to the end of the course navigation.
+                $coursehomenode->add_node($resourcesnode);
+
+                // Remove the resources element from the modfullnames array to avoid that courses which only have resources get
+                // an empty activities node.
+                unset ($modfullnames['resources']);
+            }
+        }
+    }
+
 
     // Check if admin wants us to insert custom nodes for users in Boost's nav drawer.
     if (isset($config->insertcustomnodesusers) && !empty($config->insertcustomnodesusers)) {
