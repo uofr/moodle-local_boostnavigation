@@ -37,6 +37,10 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
     // Include local library.
     require_once(__DIR__ . '/locallib.php');
+	
+
+    // Include theme local library for categories.
+	require_once($CFG->dirroot . "/theme/urcourses_default/locallib.php");
 
     // Check if admin wanted us to remove the myhome node from Boost's nav drawer.
     // We have to check explicitely if the configurations are set because this function will already be
@@ -132,6 +136,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                     $childnode = $mycoursesnode->get($k);
                     $childnode->hidden = true;
                     $childnode->isexpandable = false;
+					$childnode->cssclass = theme_urcourses_default_get_ur_category_class($childnode->key).' added';
                 }
             } else {
                 $mycoursesnode->collapse = false;
@@ -139,6 +144,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                     $childnode = $mycoursesnode->get($k);
                     $childnode->hidden = false;
                     $childnode->isexpandable = false;
+					$childnode->cssclass = theme_urcourses_default_get_ur_category_class($childnode->key).' added';
                 }
             }
         }
@@ -359,9 +365,14 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                 if (!$cm->uservisible or !$cm->has_view()) {
                     continue;
                 }
+				// if activity has already been added, continue
                 if (array_key_exists($cm->modname, $modfullnames)) {
                     continue;
                 }
+				// exclude mod_mail because we add it manually elsewhere
+				if ($cm->modname == 'mail') {
+					continue;
+				}
                 if (!array_key_exists($cm->modname, $archetypes)) {
                     $archetypes[$cm->modname] = plugin_supports('mod', $cm->modname, FEATURE_MOD_ARCHETYPE, MOD_ARCHETYPE_OTHER);
                 }
