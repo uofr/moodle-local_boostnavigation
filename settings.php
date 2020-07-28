@@ -296,6 +296,22 @@ if ($hassiteconfig) {
         /*$page->hide_if('local_boostnavigation/collapsemycoursesnodesession',
                 'local_boostnavigation/collapsemycoursesnode', 'notchecked');
 */
+
+
+        $page->add(new admin_setting_configcheckbox('local_boostnavigation/newfeaturesmycoursenode',
+        get_string('newfeaturesmycoursenode', 'local_boostnavigation',
+                array('what' => get_string('inc_rootnode', 'local_boostnavigation', null, true),
+                'which' => get_string('mycourses', 'moodle')),
+                true), get_string('setting_newfeaturesmycoursenode_desc', 'local_boostnavigation',
+                array('what' => get_string('inc_rootnode', 'local_boostnavigation', null, true),
+                      'which' => get_string('mycourses', 'moodle')),
+                true),0));
+
+
+
+
+
+
         // Add settings page to the admin settings category.
         $ADMIN->add('local_boostnavigation', $page);
 

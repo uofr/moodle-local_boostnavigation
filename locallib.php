@@ -832,3 +832,4 @@ function local_boostnavigation_customnodesusageadmins() {
 
     return $html;
 }
+

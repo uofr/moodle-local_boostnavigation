@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param global_navigation $navigation
  */
 function local_boostnavigation_extend_navigation(global_navigation $navigation) {
-    global $CFG, $PAGE, $COURSE;
+    global $CFG, $PAGE, $COURSE, $USER;
 
     // Fetch config.
     $config = get_config('local_boostnavigation');
@@ -140,8 +140,12 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                 }
             } else {
                 $mycoursesnode->collapse = false;
+
                 foreach ($mycourseschildrennodeskeys as $k) {
                     $childnode = $mycoursesnode->get($k);
+
+
+                 
                     $childnode->hidden = false;
                     $childnode->isexpandable = false;
 					$childnode->cssclass = theme_urcourses_default_get_ur_category_class($childnode->key).' added';
@@ -162,6 +166,67 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
         }
     }
 
+    //ADDED for New Feature
+      // Check if admin wanted us to add new features to mycourse node
+    if (isset($config->newfeaturesmycoursenode) && $config->newfeaturesmycoursenode == true) {
+
+        // If yes, do it.
+        if ($mycoursesnode) {
+
+            $courses = enrol_get_all_users_courses($USER->id, true, array('enddate'));
+
+            $childnodes=[];
+            foreach ($mycourseschildrennodeskeys as $k) {
+                //Not a great way to get the info we need
+                //Will need to think of a better way to fetch and input the info whille keeping the 
+                //node structure
+                foreach($courses as $course){
+
+                    //if courses match together
+                    if($course->id == $k){
+
+                        $temp = $mycoursesnode->get($k);
+                        //add start and end info into the node
+                        $temp->enddate= $course->enddate;
+                        $temp->startdate =$course->startdate;
+
+                        $month = date("m", $course->startdate);
+                       
+                        //determine which term the node is in
+                        if($month >= 1 && $month <= 4){
+                            $temp->winter ="Winter";
+                        }elseif($month >= 5 && $month <= 8){
+                            $temp->spring ="Spring";
+                        }elseif($month >=9 && $month <= 12){
+                            $temp->fall ="Fall";
+                        }
+
+                        //check if course is starting in the future
+                        if(time() < $course->startdate){
+                            $temp->future ="true";
+
+                            //check if user is student in the course
+                            $context = context_course::instance($course->id);
+                            if (!has_capability('moodle/course:update', $context)) {
+                                $temp->noaccess ="true";
+                           } 
+                        }
+
+                        $url = new moodle_url($temp->action);
+                        $temp->url = $url->__toString();
+
+                        $childnodes[] = $temp;
+                    }  
+                }
+            }
+
+            if(!empty($childnodes)){
+                //will overwrite current node
+                $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$childnodes]);
+            }
+        }
+    }
+    //END OF ADDED
     // Check if admin wanted us to remove the badges node from Boost's nav drawer
     // (only if there are no badges in course).
     if ($CFG->enablebadges == true && isset($config->removebadgescoursenode) && $config->removebadgescoursenode == true) {

@@ -86,7 +86,7 @@
 }
 /* ... and remove the indent of the mycourses child nodes. */
 .list-group-item[data-parent-key="mycourses"] > div {
-    margin-left: 0 !important;
+    /*margin-left: 0 !important;*/
 }
 /* Hide the icon for collapsible custom parent nodes ... */
 .jsenabled .list-group-item[data-key^="localboostnavigationcustom"][data-isexpandable="1"] .icon {
@@ -101,4 +101,8 @@
 .jsenabled .list-group-item[data-key^="localboostnavigationcustombottomusers"][data-isexpandable="1"]:not([data-parent-key^="localboostnavigationcustombottomusers"]) ~ .list-group-item[data-parent-key^="localboostnavigationcustombottomusers"] > div,
 .jsenabled .list-group-item[data-key^="localboostnavigationcustombottomadmins"][data-isexpandable="1"]:not([data-parent-key^="localboostnavigationcustombottomadmins"]) ~ .list-group-item[data-parent-key^="localboostnavigationcustombottomadmins"] > div {
     margin-left: inherit !important;
+}
+
+.urhiddendash {
+	opacity: 65%;
 }
