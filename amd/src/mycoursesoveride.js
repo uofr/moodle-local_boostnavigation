@@ -65,8 +65,7 @@ define(
         });
 
         //if parent mycourses is changed past courses need to reflect those changes
-        $('.list-group-item[data-key="mycourses"]').click(function(e) {
-    
+        $('.list-group-item[data-key="mycourses"]').click(function(e) {  
             node.find(".fa-caret-right").addClass("fa-caret-down");
             node.find(".fa-caret-down").removeClass("fa-caret-right");
         });
@@ -282,7 +281,9 @@ define(
 
             var node = $('.list-group-item[data-key="mycourses"]');
             var pastnodes = fillCurrentNode(childNodes,node );
-            createPastNode(node, pastnodes); 
+            if(pastnodes.length >0){
+                createPastNode(node, pastnodes); 
+            }
 
         }
     };
