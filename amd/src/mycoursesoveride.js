@@ -50,24 +50,19 @@ define(
 
                 // Collapse the node.
                 collapseNode(node);
-                //change arrow 
-                node.find(".fa-caret-down").addClass("fa-caret-right");
-                node.find(".fa-caret-right").removeClass("fa-caret-down");
+                
 
                 // If the parent node is currently collapsed.
             } else if (node.attr('data-collapse') == 1) {
                 // Expand the node.
                 expandNode(node);
-                //change arrow
-                node.find(".fa-caret-right").addClass("fa-caret-down");
-                node.find(".fa-caret-down").removeClass("fa-caret-right");
+                
             }
         });
 
         //if parent mycourses is changed past courses need to reflect those changes
         $('.list-group-item[data-key="mycourses"]').click(function(e) {  
-            node.find(".fa-caret-right").addClass("fa-caret-down");
-            node.find(".fa-caret-down").removeClass("fa-caret-right");
+            collapseNode(node);
         });
     }
 
@@ -84,6 +79,9 @@ define(
         node.attr("data-collapse", "1");
         // Change the aria-expanded attribute of the node itself to false.
         node.attr("aria-expanded", "0");
+        //change arrow 
+        node.find(".fa-caret-down").addClass("fa-caret-right");
+        node.find(".fa-caret-right").removeClass("fa-caret-down");
      }
 
     /**
@@ -98,6 +96,9 @@ define(
         node.attr("data-collapse", "0");
         // Change the aria-expanded attribute of the node itself to true.
         node.attr("aria-expanded", "1");
+        //change arrow
+        node.find(".fa-caret-right").addClass("fa-caret-down");
+        node.find(".fa-caret-down").removeClass("fa-caret-right");
     }
 
     /**
