@@ -110,7 +110,6 @@ define(
         // Initialize string variable to remember the child node ids.
         var ids = '';
         // Get the elements which have the nodename as their data-parent-key attribute.
-       
         $('.list-group-item[data-past="true"]').each(function(index, element) {
             // Get its data-key attribute (which should be unique) to be used as id attribute.
             var id = $(element).attr('data-key');
@@ -205,7 +204,7 @@ define(
         divarray['showdivider']=0;
         divarray['type']=0;
         divarray['nodetype']=1;
-        divarray['collapse']=0;
+        divarray['collapse']=1;
         divarray['forceopen']=1;
         divarray['isactive']=0;
         divarray['hidden']=0;
@@ -229,19 +228,24 @@ define(
     function fillPastNode(nodes) {
     
         var past = $('.list-group-item[data-key="mycoursespast"]');
+
         for(var i=0; i<nodes.length; i++){
 
             //used for fomating the new section
             nodes[i]['get_indent']=2;
             nodes[i].past=true;
+            nodes[i].hidden=1;
    
             Templates.render('local_boostnavigation/mycoursesoveride', nodes[i]).then(function(html) {
-                past.after(html);
-                //register event handlers to exapnd and shrink past nodes and label
-                initToggleNodes("mycoursespast");
+                past.after(html);  
             });
         }
 
+        $.when.apply($, nodes).done(function() {
+            // do things that need to wait until ALL gets are done
+            //register event handlers
+            initToggleNodes("mycoursespast"); 
+        });
     }
 
      /**

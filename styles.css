@@ -106,3 +106,8 @@
 .urhiddendash {
 	opacity: 65%;
 }
+
+.list-group-item[data-key="mycoursespast"] {
+    cursor: pointer;
+    
+}
