@@ -261,7 +261,7 @@ define(
         for(var i=0; i<childNodes.length; i++){
 
             //add furture tab for whiteout class in template
-            if(childNodes[i].enddate  != 0){
+            if(childNodes[i].enddate  != 0 && childNodes[i].enddate  != undefined && childNodes[i].enddate < Math.floor(Date.now() / 1000) ){
                 //if end date exists save in past array to place at end
                 pastnodes.push(childNodes[i]);
 
