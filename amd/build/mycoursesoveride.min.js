@@ -187,6 +187,30 @@ define(
         tabbableDiv(node); 
     }
 
+    /**
+     * 
+     * @param {object array} array of mycourses nodes
+     * @param {key1} attribute to sort by
+     * @param {key2} attribute to sort by
+     */
+
+    function sortByKeyDesc(array, key1, key2) {
+        return array.sort(function (a, b) {
+            
+            if(a[key1]==b[key1]){
+
+                var x = a[key2]; 
+                var y = b[key2];
+                return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+
+            }else{
+
+                var x = a[key1]; 
+                var y = b[key1];
+                return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+            }
+        });
+    }
 
 
     /**
@@ -285,7 +309,9 @@ define(
         init: function(childNodes) {
 
             var node = $('.list-group-item[data-key="mycourses"]');
-            var pastnodes = fillCurrentNode(childNodes,node );
+
+
+            var pastnodes = fillCurrentNode(sortByKeyDesc(childNodes, "term","text"),node );
             if(pastnodes.length >0){
                 createPastNode(node, pastnodes); 
             }

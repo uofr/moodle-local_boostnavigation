@@ -195,10 +195,13 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         //determine which term the node is in
                         if($month >= 1 && $month <= 4){
                             $temp->winter ="Winter";
+                            $temp->term = "winter";
                         }elseif($month >= 5 && $month <= 8){
                             $temp->spring ="Spring";
+                            $temp->term = "spring";
                         }elseif($month >=9 && $month <= 12){
                             $temp->fall ="Fall";
+                            $temp->term = "fall";
                         }
 
                         //check if course is starting in the future
