@@ -175,7 +175,11 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
             $courses = enrol_get_all_users_courses($USER->id, true, array('enddate'));
 
-            $childnodes=[];
+            $currentnodes=[];
+            $pastnodes=[];
+
+            $cterms=[];
+            $pterms=[];
             foreach ($mycourseschildrennodeskeys as $k) {
                 //Not a great way to get the info we need
                 //Will need to think of a better way to fetch and input the info whille keeping the 
@@ -195,14 +199,17 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         //determine which term the node is in
                         if($month >= 1 && $month <= 4){
                             $temp->winter ="Winter";
-                            $temp->term = "winter";
+                            $temp->term = "Winter";
+                           
                         }elseif($month >= 5 && $month <= 8){
                             $temp->spring ="Spring";
-                            $temp->term = "spring";
+                            $temp->term = "Spring";
                         }elseif($month >=9 && $month <= 12){
                             $temp->fall ="Fall";
-                            $temp->term = "fall";
+                            $temp->term = "Fall";
                         }
+
+                        
 
                         //check if course is starting in the future
                         if(time() < $course->startdate){
@@ -218,14 +225,28 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $url = new moodle_url($temp->action);
                         $temp->url = $url->__toString();
 
-                        $childnodes[] = $temp;
+                        if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
+                            if (!in_array($temp->term, $pterms)) {
+                                $pterms[]=$temp->term;
+                                
+                            }
+                            $pastnodes[] = $temp;
+                        }else{
+                            if (!in_array($temp->term, $cterms)) {
+                                $cterms[]=$temp->term;
+                            }
+                            $currentnodes[]=$temp;
+                        }
                     }  
                 }
             }
 
-            if(!empty($childnodes)){
+            if(!empty($currentnodes) || !empty($pastnodes) ){
+                rsort($cterms);
+                rsort($pterms);
+
                 //will overwrite current node
-                $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$childnodes]);
+                $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$currentnodes,$cterms,$pastnodes,$pterms]);
             }
         }
     }

@@ -67,29 +67,39 @@
                 </span>
                
             {{/icon.pix}}
-                <span class="media-body {{#isactive}}font-weight-bold{{/isactive}}">{{{text}}}</span>
-                {{#winter}} <span class="badge badge-secondary">{{.}}</span> {{/winter}}
-                {{#spring}} <span class="badge badge-success">{{.}}</span> {{/spring}}
-                {{#fall}} <span class="badge badge-warning">{{.}}</span> {{/fall}}
-                
+                <span class="media-body {{#isactive}}font-weight-bold{{/isactive}}">{{{text}}}</span>             
             </div>
         </div>
     </a>
     {{/action}}
      {{^action}}
-    <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
-        <div class="m-l-0">
-            <div class="media">
-                {{#icon.pix}}
-                <span class="media-left">
-                    {{#pix}}{{{icon.pix}}}, {{{icon.component}}}, {{{icon.alt}}}{{/pix}}
+     {{#header}}
 
 
-                </span>
-                {{/icon.pix}}
-                <span class="media-body">{{{text}}}  <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"></i> </span>
+        <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}       " data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
+            <small class="m-l-{{get_indent}}">
+               {{text}} Term 
+            </small>
+        </div>
+
+
+
+    {{/header}}
+    {{^header}}
+        <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
+            <div class="m-l-0">
+                <div class="media">
+                    {{#icon.pix}}
+                    <span class="media-left">
+                        {{#pix}}{{{icon.pix}}}, {{{icon.component}}}, {{{icon.alt}}}{{/pix}}
+
+
+                    </span>
+                    {{/icon.pix}}
+                    <span class="media-body">{{{text}}}  <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"></i> </span>
+                </div>
             </div>
         </div>
-    </div>
+    {{/header}}
     {{/action}}
 
