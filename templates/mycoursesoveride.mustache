@@ -75,14 +75,11 @@
      {{^action}}
      {{#header}}
 
-
-        <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}       " data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
+        <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
             <small class="m-l-{{get_indent}}">
-               {{text}} Term 
+               {{text}}
             </small>
         </div>
-
-
 
     {{/header}}
     {{^header}}

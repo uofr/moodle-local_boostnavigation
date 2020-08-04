@@ -832,4 +832,95 @@ function local_boostnavigation_customnodesusageadmins() {
 
     return $html;
 }
+/**
+ * Helper function to generate order in which terms need to be sorted
+ *
+ * @return string
+ */
+function local_boostnavigation_term_order() {
+
+    $month = date("m", time());
+                       
+    //determine which term the node is in
+    if($month >= 1 && $month <= 4){
+        //winter
+        return array("Fall","Spring/Summer","Winter");
+    }elseif($month >= 5 && $month <= 8){
+        //spring/summer
+        return array("Winter","Fall","Spring/Summer");
+    }elseif($month >=9 && $month <= 12){
+        //fall
+        return array("Winter","Spring/Summer","Fall");
+    }
+}
+/**
+ * Sorts year and terms into proper order for display
+ *
+ * @return array
+ */
+function local_boostnavigation_sortTerms($terms,$past) {
+
+    if($past){
+
+        //order needs to be backwards inorder to append to mycourses node properly
+       // $order = array("Winter", "Spring/Summer", "Fall");
+        $order = array("Fall", "Spring/Summer", "Winter");
+    
+        usort($terms, function ($a, $b) use ($order) {
+
+            $aparts = explode(" ", $a);
+            $bparts = explode(" ", $b);
+
+
+            error_log(print_r($aparts[1]." ".$bparts[1],TRUE));
+
+            if($aparts[1] > $bparts[1]){
+                return 1;
+            }elseif($aparts[1]==$bparts[1]){
+                
+                $pos_a = array_search($aparts[0], $order);
+                $pos_b = array_search($bparts[0], $order);
+
+                return $pos_a - $pos_b;
+            }else{
+                return -1;
+            }
+        });
+        return $terms;
+    }else{
+
+        $order = local_boostnavigation_term_order();
+
+        usort($terms, function ($a, $b) use ($order) {
+
+            $aparts = explode(" ", $a);
+            $bparts = explode(" ", $b);
+
+            if($aparts[1]>$bparts[1]){
+                return -1;
+            }elseif($aparts[1]==$bparts[1]){
+                
+                $pos_a = array_search($aparts[0], $order);
+                $pos_b = array_search($bparts[0], $order);
+
+                return $pos_a - $pos_b;
+            }
+            else{
+                return 1;
+            }
+        });
+        return $terms;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 

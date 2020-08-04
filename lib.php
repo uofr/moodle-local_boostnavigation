@@ -174,42 +174,39 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
         if ($mycoursesnode) {
 
             $courses = enrol_get_all_users_courses($USER->id, true, array('enddate'));
-
             $currentnodes=[];
             $pastnodes=[];
-
-            $cterms=[];
             $pterms=[];
+            $cterms=[];
+
             foreach ($mycourseschildrennodeskeys as $k) {
                 //Not a great way to get the info we need
                 //Will need to think of a better way to fetch and input the info whille keeping the 
                 //node structure
                 foreach($courses as $course){
-
                     //if courses match together
                     if($course->id == $k){
-
+         
                         $temp = $mycoursesnode->get($k);
                         //add start and end info into the node
                         $temp->enddate= $course->enddate;
                         $temp->startdate =$course->startdate;
 
+                        $year = date("Y", $course->startdate);
                         $month = date("m", $course->startdate);
-                       
+
                         //determine which term the node is in
                         if($month >= 1 && $month <= 4){
                             $temp->winter ="Winter";
-                            $temp->term = "Winter";
+                            $temp->term = "Winter ".$year;
                            
                         }elseif($month >= 5 && $month <= 8){
-                            $temp->spring ="Spring";
-                            $temp->term = "Spring";
+                            $temp->spring ="Spring/Summer";
+                            $temp->term = "Spring/Summer ".$year;
                         }elseif($month >=9 && $month <= 12){
                             $temp->fall ="Fall";
-                            $temp->term = "Fall";
+                            $temp->term = "Fall ".$year;
                         }
-
-                        
 
                         //check if course is starting in the future
                         if(time() < $course->startdate){
@@ -226,9 +223,9 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $temp->url = $url->__toString();
 
                         if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
+
                             if (!in_array($temp->term, $pterms)) {
-                                $pterms[]=$temp->term;
-                                
+                                $pterms[]=$temp->term;  
                             }
                             $pastnodes[] = $temp;
                         }else{
@@ -241,12 +238,13 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                 }
             }
 
-            if(!empty($currentnodes) || !empty($pastnodes) ){
-                rsort($cterms);
-                rsort($pterms);
+           if(!empty($currentnodes) || !empty($pastnodes) ){
+        
+                $cterms = local_boostnavigation_sortTerms($cterms,false);
+                $pterms = local_boostnavigation_sortTerms($pterms,true);
 
                 //will overwrite current node
-                $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$currentnodes,$cterms,$pastnodes,$pterms]);
+               $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$currentnodes,$cterms,$pastnodes,$pterms]);
             }
         }
     }

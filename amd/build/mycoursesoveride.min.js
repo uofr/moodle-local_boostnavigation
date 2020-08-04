@@ -51,7 +51,6 @@ define(
                 // Collapse the node.
                 collapseNode(node);
                 
-
                 // If the parent node is currently collapsed.
             } else if (node.attr('data-collapse') == 1) {
                 // Expand the node.
@@ -292,6 +291,7 @@ define(
         });
     }
 
+
      /**
      * Fill in all future and current nodes
      * @param {array} childNodes object array with all current and future
@@ -306,13 +306,10 @@ define(
 
             if(term != childNodes[i].term ){
                 term = childNodes[i].term;  
-            }
-                
+            }       
            
             var termnodes = $('.list-group-item[data-key="'+term+'"]');
 
-           
-                   
             for(var j=0; j<termnodes.length;j++){
 
                 var attr = $(termnodes[j]).attr("data-past");
@@ -334,7 +331,6 @@ define(
         });
 
     }
-
 
      /**
      * Create header indicating term
@@ -372,7 +368,14 @@ define(
             headerarray['text']=term;
             headerarray['parent_key']="mycourses";
             headerarray['get_indent']=1;
-            headerarray[term]="true";
+
+            var split = term.split(" ");
+            if(split[0]=="Spring/Summer"){
+                headerarray["Spring"]="true";
+            }else{
+                headerarray[split[0]]="true";
+            }
+
             if(past){
                 headerarray['past']="true";
                 headerarray['hidden']=1;
@@ -408,6 +411,7 @@ define(
             createHeaders(cterms,node,false).then(function(results){
                 fillCurrentNode(sortByKeyDesc(currentNodes, "term","text"));
             });  
+
         }
     };
 });
