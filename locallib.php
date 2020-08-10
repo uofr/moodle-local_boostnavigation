@@ -854,6 +854,21 @@ function local_boostnavigation_term_order() {
     }
 }
 /**
+ * Helper function to get term based on date passed in
+ *
+ * @return string
+ */
+function local_boostnavigation_get_term($month, $year) {
+
+    if($month >= 1 && $month <= 4){
+       return "Winter ".$year;
+    }elseif($month >= 5 && $month <= 8){
+        return "Spring/Summer ".$year;
+    }elseif($month >=9 && $month <= 12){
+        return "Fall ".$year;
+    }
+}
+/**
  * Sorts year and terms into proper order for display
  *
  * @return array

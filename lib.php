@@ -194,19 +194,14 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
                         $year = date("Y", $course->startdate);
                         $month = date("m", $course->startdate);
+                        $pastterm = strtotime("-4 months", time());
+                        $currentmonth =date("m", time());
+                        $currentyear = date("Y", time());
 
-                        //determine which term the node is in
-                        if($month >= 1 && $month <= 4){
-                            $temp->winter ="Winter";
-                            $temp->term = "Winter ".$year;
-                           
-                        }elseif($month >= 5 && $month <= 8){
-                            $temp->spring ="Spring/Summer";
-                            $temp->term = "Spring/Summer ".$year;
-                        }elseif($month >=9 && $month <= 12){
-                            $temp->fall ="Fall";
-                            $temp->term = "Fall ".$year;
-                        }
+                        error_log(print_r(date('Y-m-d', $pasterm), TRUE));
+
+                        $currentterm = local_boostnavigation_get_term($currentmonth, $currentyear);
+                        $temp->term = local_boostnavigation_get_term($month, $year);
 
                         //check if course is starting in the future
                         if(time() < $course->startdate){
@@ -222,12 +217,30 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $url = new moodle_url($temp->action);
                         $temp->url = $url->__toString();
 
+                        //if end date is set 
                         if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
 
                             if (!in_array($temp->term, $pterms)) {
                                 $pterms[]=$temp->term;  
                             }
                             $pastnodes[] = $temp;
+                        }else if(($temp->enddate  == 0 || !isset($temp->enddate))&& $temp->startdate < $pastterm ){
+                            //if there is no end date and startdate is greater then four month
+                            //place in past year
+
+                            if (!in_array($temp->term, $pterms)) {
+                                $pterms[]=$temp->term;  
+                            }
+                            $pastnodes[] = $temp;
+
+                        }else if($temp->enddate > time() && $temp->startdate <= $pastterm){
+                        
+                            //if enddate is in future, but startdate is in past term place in current term.
+                            $temp->term = $currentterm;
+                            if (!in_array($temp->term, $cterms)) {
+                                $cterms[]=$temp->term;
+                            }
+                            $currentnodes[]=$temp;
                         }else{
                             if (!in_array($temp->term, $cterms)) {
                                 $cterms[]=$temp->term;
