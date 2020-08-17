@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @param global_navigation $navigation
  */
 function local_boostnavigation_extend_navigation(global_navigation $navigation) {
-    global $CFG, $PAGE, $COURSE, $USER;
+    global $CFG, $PAGE, $COURSE, $USER, $DB;
 
     // Fetch config.
     $config = get_config('local_boostnavigation');
@@ -198,7 +198,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $currentmonth =date("m", time());
                         $currentyear = date("Y", time());
 
-                        error_log(print_r(date('Y-m-d', $pasterm), TRUE));
+                        error_log(print_r(date('Y-m-d', $pastterm), TRUE));
 
                         $currentterm = local_boostnavigation_get_term($currentmonth, $currentyear);
                         $temp->term = local_boostnavigation_get_term($month, $year);
@@ -206,15 +206,36 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         //check if course is starting in the future
                         if(time() < $course->startdate){
                             $temp->future ="true";
-
-                            //check if user is student in the course
-                            $context = context_course::instance($course->id);
-                            if (!has_capability('moodle/course:update', $context)) {
-                                $temp->noaccess ="true";
-                           } 
                         }
-
+						
+                        //check user roles in the course
+                        $context = context_course::instance($course->id);
+						$userroles = $DB->get_records('role_assignments', array('contextid' => $context->id,'userid' => $USER->id));
+						
+						// find highest/lowest role 5 -student,4 noneditteacher, 3-editteacher, 2 coursecreator, 1 manager
+						$roleid = 0;
+						foreach ($userroles as $userrole) {
+							$chkid = $userrole->roleid;
+							if ($chkid > 0) {
+								if ($roleid > 0) {
+									if ($chkid < $roleid) {
+										$roleid = $chkid;
+									}
+								} else {
+									//get the first role
+									$roleid = $chkid;
+								}
+							}
+						}
+						
                         $url = new moodle_url($temp->action);
+
+						error_log('roleid:'.$roleid);
+						if ($roleid == 5 && $course->visible == 0) {
+                            //$temp->noaccess ="true";
+							$url = new moodle_url($CFG->wwwroot.'/?redirect=0#summary-'.$course->id);
+                        }
+						
                         $temp->url = $url->__toString();
 
                         //if end date is set 
