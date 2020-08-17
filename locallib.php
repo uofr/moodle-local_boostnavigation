@@ -887,8 +887,6 @@ function local_boostnavigation_sortTerms($terms,$past) {
             $bparts = explode(" ", $b);
 
 
-            error_log(print_r($aparts[1]." ".$bparts[1],TRUE));
-
             if($aparts[1] > $bparts[1]){
                 return 1;
             }elseif($aparts[1]==$bparts[1]){

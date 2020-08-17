@@ -67,22 +67,56 @@
                 </span>
                
             {{/icon.pix}}
-                <span class="media-body {{#isactive}}font-weight-bold{{/isactive}}">{{{text}}}</span>             
+                <span class="media-body {{#isactive}}font-weight-bold{{/isactive}}">{{{text}}}</span>        
+
+                {{^visible}}
+                    
+                    
+                      {{#future}}
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        {{/future}}
+
+                        {{^future}}
+                            <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                        {{/future}}
+                {{/visible}}
+
+                {{#visible}}
+                    
+                      {{#future}}
+                            <i class="fa fa-clock-o" aria-hidden="true"></i>
+                        {{/future}}
+  
+                {{/visible}}
+
+              
+
+
+
+
+
             </div>
         </div>
     </a>
     {{/action}}
      {{^action}}
      {{#header}}
-
-        <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
-            <small class="m-l-{{get_indent}}">
-               {{text}}
-            </small>
-        </div>
+        {{#ongoing}}
+             <div class="list-group-item p-1 navbar-light alert-dark" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{key}}" >
+             </div>
+        {{/ongoing}}
+        {{^ongoing}}
+             <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
+                <small class="m-l-{{get_indent}}">
+                {{text}}
+                </small>
+            </div>
+        {{/ongoing}}
 
     {{/header}}
     {{^header}}
+    <div class="list-group-item p-1 navbar-light alert-dark" data-parent-key="{{parent}}" >
+        </div>
         <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
             <div class="m-l-0">
                 <div class="media">

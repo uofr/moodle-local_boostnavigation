@@ -211,6 +211,61 @@ define(
         });
     }
 
+    /**
+     * 
+     * @param {object array} array of mycourses nodes
+     * @param {key1} attribute to sort by
+     */
+
+    function sortByKeyDesc(array, key1) {
+        return array.sort(function (a, b) {
+            
+            var x = a[key1]; 
+            var y = b[key1];
+            return ((x > y) ? -1 : ((x < y) ? 1 : 0));
+            
+        });
+    }
+
+     /**
+     * Create a past course drop down section in mycourses
+     * @param {object} node of mycourses
+     * @param {array} pastnodes array of objects containing all nodes needing to be placed in past courses
+     */
+    function createOngoingNode(node,ongoingnodes) {
+       
+        var divarray = {};
+        divarray['key']='mycoursesongoing';
+        divarray['parent_key']="mycourses";
+        divarray['text']="Ongoing courses"; 
+        divarray["ongoing"]=true;
+        divarray["header"]=true;
+        divarray['get_indent']=0;
+
+       Templates.render('local_boostnavigation/mycoursesoveride', divarray).then(function(html) {
+       
+            node.after(html);
+            //add in nodes under label
+            fillOngoingNode(ongoingnodes);   
+        });
+    }
+
+     /**
+     * Fill nodes into mycoursespast 
+     * @param {array} nodes Array of past nodes
+     */
+    function fillOngoingNode(nodes) {
+
+        var termnode = $('.list-group-item[data-key="mycoursesongoing"]');
+
+        for(var i=0; i<nodes.length; i++){
+
+            //used for fomating the new section
+            nodes[i]['get_indent']=0;
+            createNode(termnode[0], nodes[i]);
+        }
+    }
+
 
     /**
      * Create a past course drop down section in mycourses
@@ -327,7 +382,9 @@ define(
      */
     function createNode(node,childNode) {
         Templates.render('local_boostnavigation/mycoursesoveride', childNode).then(function(html) {
-            $(node).after(html);  
+
+             $(node).after(html);  
+         
         });
 
     }
@@ -397,20 +454,27 @@ define(
     }
 
     return {
-        init: function(currentNodes,cterms, pastNodes, pterms) {
+        init: function(currentNodes,cterms, pastNodes, pterms, ongoingNodes) {
 
             var nodes = $('.list-group-item[data-parent-key="mycourses"]');
             nodes.remove();
 
             var node = $('.list-group-item[data-key="mycourses"]');
 
+           
+
             if(pastNodes.length >0){
                 createPastNode(node, sortByKeyDesc(pastNodes,"term","text"),pterms); 
             }
             
+            
             createHeaders(cterms,node,false).then(function(results){
                 fillCurrentNode(sortByKeyDesc(currentNodes, "term","text"));
             });  
+
+            if(ongoingNodes.length >0){
+                createOngoingNode(node, sortByKeyDesc(ongoingNodes,"text")); 
+            }
 
         }
     };
