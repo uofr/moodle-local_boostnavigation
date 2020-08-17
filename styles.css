@@ -111,3 +111,11 @@
     cursor: pointer;
     
 }
+.list-group-item[data-key="home"] {
+	border-top-width: 2px;
+	border-bottom-width: 2px;
+}
+.list-group-item[data-parent-key="mycourses"] .media i.fa {
+	color: #aaaaaa;
+	margin-top: 0.25em;
+}

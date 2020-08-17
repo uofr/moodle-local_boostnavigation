@@ -68,33 +68,29 @@
                
             {{/icon.pix}}
                 <span class="media-body {{#isactive}}font-weight-bold{{/isactive}}">{{{text}}}</span>        
-
                 {{^visible}}
-                    
-                    
                       {{#future}}
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
                         {{/future}}
-
                         {{^future}}
-                            <i class="fa fa-eye-slash" aria-hidden="true"></i>
+							{{#past}}
+                            <i class="fa fa-calendar-o" aria-hidden="true"></i>
+							{{/past}}
                         {{/future}}
                 {{/visible}}
-
                 {{#visible}}
-                    
                       {{#future}}
                             <i class="fa fa-clock-o" aria-hidden="true"></i>
-                        {{/future}}
-  
+                      {{/future}}
+                      {{^future}}
+						{{^past}}
+                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+						{{/past}}
+						{{#past}}
+                          <i class="fa fa-calendar-o" aria-hidden="true"></i>
+						{{/past}}
+                      {{/future}}
                 {{/visible}}
-
-              
-
-
-
-
-
             </div>
         </div>
     </a>
@@ -102,7 +98,7 @@
      {{^action}}
      {{#header}}
         {{#ongoing}}
-             <div class="list-group-item p-1 navbar-light alert-dark" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{key}}" >
+             <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{key}}" >
              </div>
         {{/ongoing}}
         {{^ongoing}}
@@ -115,7 +111,7 @@
 
     {{/header}}
     {{^header}}
-    <div class="list-group-item p-1 navbar-light alert-dark" data-parent-key="{{parent}}" >
+    <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-parent-key="{{parent}}" >
         </div>
         <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
             <div class="m-l-0">
