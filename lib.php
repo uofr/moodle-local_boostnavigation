@@ -244,9 +244,6 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         if($course->visible ==0 ){
                             $temp->visible ="false";
                         }
-                        
-
-                        error_log(print_r($temp->visible,TRUE));
 
                         //if continuing course date it set
                         if($ongoingdate == $temp->startdate){
