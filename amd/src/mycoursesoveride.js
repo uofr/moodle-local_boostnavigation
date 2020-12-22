@@ -21,8 +21,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-
 define(
     [
         'jquery',
@@ -40,7 +38,7 @@ define(
      * @param {Object} node The nav node which should be toggled.
      * @param {string} nodename The nav node's nodename.
      */
-    function toggleClickHandler(node, nodename) {
+    function toggleClickHandler(node) {
         node.click(function(e) {
             // Prevent that the browser opens the node's default action link (if existing).
             e.preventDefault();
@@ -50,17 +48,16 @@ define(
 
                 // Collapse the node.
                 collapseNode(node);
-                
-                // If the parent node is currently collapsed.
+
+            // If the parent node is currently collapsed.
             } else if (node.attr('data-collapse') == 1) {
                 // Expand the node.
                 expandNode(node);
-                
             }
         });
 
         //if parent mycourses is changed past courses need to reflect those changes
-        $('.list-group-item[data-key="mycourses"]').click(function(e) {  
+        $('.list-group-item[data-key="mycourses"]').click(function() {
             collapseNode(node);
         });
     }
@@ -74,11 +71,12 @@ define(
 
         // Set the hidden attribute to true for all elements which have the nodename as their data-parent-key attribute.
         $('.list-group-item[data-past="true"]').attr("data-hidden", "1");
+        $('.list-group-item[data-past="true"]').addClass("localboostnavigationcollapsedchild");
         // Change the collapse attribute of the node itself to true.
         node.attr("data-collapse", "1");
         // Change the aria-expanded attribute of the node itself to false.
         node.attr("aria-expanded", "0");
-        //change arrow 
+        //change arrow
         node.find(".fa-caret-down").addClass("fa-caret-right");
         node.find(".fa-caret-right").removeClass("fa-caret-down");
      }
@@ -91,6 +89,7 @@ define(
     function expandNode(node) {
         // Set the hidden attribute to false for all elements which have the nodename as their data-parent-key attribute.
         $('.list-group-item[data-past="true"]').attr("data-hidden", "0");
+        $('.list-group-item[data-past="true"]').removeClass("localboostnavigationcollapsedchild");
         // Change the collapse attribute of the node itself to false.
         node.attr("data-collapse", "0");
         // Change the aria-expanded attribute of the node itself to true.
@@ -105,7 +104,7 @@ define(
      * @param {Object} node The nav node which should get the aria-attributes.
      * @param {string} nodename The nav node's nodename.
      */
-    function addAriaToParent(node, nodename) {
+    function addAriaToParent(node) {
         // Add ids to the child nodes for referencing in aria-controls.
         // Initialize string variable to remember the child node ids.
         var ids = '';
@@ -178,16 +177,15 @@ define(
         var node = $('.list-group-item[data-key="' + nodename + '"]');
 
         // Add a click handler to this node.
-        toggleClickHandler(node, nodename);
+        toggleClickHandler(node);
 
         // Add aria-attributes to this node.
-        addAriaToParent(node, nodename);
-
-        tabbableDiv(node); 
+        addAriaToParent(node);
+        tabbableDiv(node);
     }
 
     /**
-     * 
+     *
      * @param {object array} array of mycourses nodes
      * @param {key1} attribute to sort by
      * @param {key2} attribute to sort by
@@ -195,16 +193,13 @@ define(
 
     function sortByKeyDesc(array, key1, key2) {
         return array.sort(function (a, b) {
-            
             if(a[key1]==b[key1]){
 
-                var x = a[key2]; 
+                var x = a[key2];
                 var y = b[key2];
                 return ((x > y) ? -1 : ((x < y) ? 1 : 0));
-
             }else{
-
-                var x = a[key1]; 
+                var x = a[key1];
                 var y = b[key1];
                 return ((x > y) ? -1 : ((x < y) ? 1 : 0));
             }
@@ -212,18 +207,15 @@ define(
     }
 
     /**
-     * 
+     *
      * @param {object array} array of mycourses nodes
      * @param {key1} attribute to sort by
      */
-
     function sortByKeyDesc(array, key1) {
         return array.sort(function (a, b) {
-            
-            var x = a[key1]; 
+            var x = a[key1];
             var y = b[key1];
             return ((x > y) ? -1 : ((x < y) ? 1 : 0));
-            
         });
     }
 
@@ -233,25 +225,25 @@ define(
      * @param {array} pastnodes array of objects containing all nodes needing to be placed in past courses
      */
     function createOngoingNode(node,ongoingnodes) {
-       
+
         var divarray = {};
         divarray['key']='mycoursesongoing';
         divarray['parent_key']="mycourses";
-        divarray['text']="Ongoing courses"; 
+        divarray['text']="Ongoing courses";
         divarray["ongoing"]=true;
         divarray["header"]=true;
         divarray['get_indent']=0;
 
        Templates.render('local_boostnavigation/mycoursesoveride', divarray).then(function(html) {
-       
+
             node.after(html);
             //add in nodes under label
-            fillOngoingNode(ongoingnodes);   
+            fillOngoingNode(ongoingnodes);
         });
     }
 
      /**
-     * Fill nodes into mycoursespast 
+     * Fill nodes into mycoursespast
      * @param {array} nodes Array of past nodes
      */
     function fillOngoingNode(nodes) {
@@ -273,7 +265,7 @@ define(
      * @param {array} pastnodes array of objects containing all nodes needing to be placed in past courses
      */
     function createPastNode(node,pastnodes, pterms) {
-       
+
         var icon =[];
         icon.push({'pix':'i/moremenu','alt':"",'component':"moodle"});
         var divarray = {};
@@ -289,30 +281,29 @@ define(
         divarray['hidden']=0;
         divarray['preceedwithhr']=0;
         divarray['parent']="mycourses";
-        divarray['text']="Past courses"; 
+        divarray['text']="Past courses";
         divarray["icon"]=icon;
 
        Templates.render('local_boostnavigation/mycoursesoveride', divarray).then(function(html) {
-       
+
             node.after(html);
             //add term header
 
             var past = $('.list-group-item[data-key="mycoursespast"]');
-         
-            createHeaders(pterms,past,true).then(function(results){
+
+            createHeaders(pterms,past,true).then(function(){
                 //add in nodes under label
-                fillPastNode(pastnodes); 
+                fillPastNode(pastnodes);
             });
-            
         });
     }
 
      /**
-     * Fill nodes into mycoursespast 
+     * Fill nodes into mycoursespast
      * @param {array} nodes Array of past nodes
      */
     function fillPastNode(nodes) {
-    
+
         var term ="";
 
         for(var i=0; i<nodes.length; i++){
@@ -323,7 +314,7 @@ define(
             nodes[i].hidden=1;
 
             if(term != nodes[i].term ){
-                term = nodes[i].term;    
+                term = nodes[i].term;
             }
 
             var termnodes = $('.list-group-item[data-key="'+term+'"]');
@@ -333,16 +324,15 @@ define(
                 var attr = $(termnodes[j]).attr("data-past");
                 if ( attr == "true" || attr == true  ) {
                     var termnode = termnodes[j];
-                }        
+                }
             }
-        
             createNode(termnode, nodes[i]);
         }
 
         $.when.apply($, nodes).done(function() {
             // do things that need to wait until ALL gets are done
             //register event handlers
-            initToggleNodes("mycoursespast"); 
+            initToggleNodes("mycoursespast");
         });
     }
 
@@ -360,9 +350,9 @@ define(
         for(var i=0; i<childNodes.length; i++){
 
             if(term != childNodes[i].term ){
-                term = childNodes[i].term;  
-            }       
-           
+                term = childNodes[i].term;
+            }
+
             var termnodes = $('.list-group-item[data-key="'+term+'"]');
 
             for(var j=0; j<termnodes.length;j++){
@@ -370,9 +360,9 @@ define(
                 var attr = $(termnodes[j]).attr("data-past");
                 if ( attr == "false"   ) {
                     var termnode = termnodes[j];
-                }        
+                }
             }
-            createNode(termnode, childNodes[i]);   
+            createNode(termnode, childNodes[i]);
          }
     }
 
@@ -383,10 +373,8 @@ define(
     function createNode(node,childNode) {
         Templates.render('local_boostnavigation/mycoursesoveride', childNode).then(function(html) {
 
-             $(node).after(html);  
-         
+            $(node).after(html);
         });
-
     }
 
      /**
@@ -399,7 +387,7 @@ define(
             var deferred = $.Deferred();
             var fulfilled = 0, length = array.length;
             var results = [];
-        
+
             if (length === 0) {
                 deferred.resolve(results);
             } else {
@@ -413,12 +401,12 @@ define(
                     });
                 });
             }
-        
+
             return deferred.promise();
         };
-        
+
         var promises = [];
-    
+
         terms.forEach(function(term) {
             var headerarray = {};
             headerarray['header']='true';
@@ -440,10 +428,8 @@ define(
             }
 
             promises.push(function() {
-
-
                 return Templates.render('local_boostnavigation/mycoursesoveride', headerarray).then(function(html) {
-                    node.after(html);    
+                    node.after(html);
                 }).promise();
             });
         });
@@ -456,26 +442,24 @@ define(
     return {
         init: function(currentNodes,cterms, pastNodes, pterms, ongoingNodes) {
 
+
             var nodes = $('.list-group-item[data-parent-key="mycourses"]');
             nodes.remove();
 
             var node = $('.list-group-item[data-key="mycourses"]');
-
-           
+            node.addClass("localboostnavigationcollapsibleparent");
 
             if(pastNodes.length >0){
-                createPastNode(node, sortByKeyDesc(pastNodes,"term","text"),pterms); 
+                createPastNode(node, sortByKeyDesc(pastNodes,"term","text"),pterms);
             }
-            
-            
-            createHeaders(cterms,node,false).then(function(results){
+
+            createHeaders(cterms,node,false).then(function(){
                 fillCurrentNode(sortByKeyDesc(currentNodes, "term","text"));
-            });  
+            });
 
             if(ongoingNodes.length >0){
-                createOngoingNode(node, sortByKeyDesc(ongoingNodes,"text")); 
+                createOngoingNode(node, sortByKeyDesc(ongoingNodes,"text"));
             }
-
         }
     };
 });

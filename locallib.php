@@ -73,6 +73,9 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
         $collapsedefault=false, $accordion=false) {
     global $USER, $FULLME;
 
+    // Fetch config.
+    $config = get_config('local_boostnavigation');
+
     // Build full page URL if we have it available to be used down below.
     if (!empty($FULLME)) {
         $pagefullurl = new moodle_url($FULLME);
@@ -84,6 +87,10 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
     // Initialize variables for remembering the last parent node.
     $lastparentnode = null;
     $lastparentnodevisible = false;
+
+    // Initialize variables for marking the first custom bottom parent nodes.
+    $firstcustombuttomusersparentnodeseen = false;
+    $firstcustombuttomadminsparentnodeseen = false;
 
     // Initialize variables for remembering the node keys for collapsing.
     $collapsenodesforjs = array();
@@ -318,13 +325,20 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
                 if ($collapse) {
                     // Remember that we haven't prepared collapsing yet for this parent node.
                     $collapselastparentprepared = false;
+                }
 
-                    // If the node shouldn't be collapsed, set some node attributes to avoid side effects with the CSS styles
-                    // which ship with this plugin.
-                } else {
-                    // Change the isexpandable attribute for the parent node to false
-                    // (it's the default in Moodle core, just to be safe).
-                    $customnode->isexpandable = false;
+                // If we are dealing with custom bottom nodes for users and this is the first parent node,
+                // add a special class for later usage in CSS.
+                if ($keyprefix == 'localboostnavigationcustombottomusers' && !$firstcustombuttomusersparentnodeseen) {
+                    $customnode->add_class('localboostnavigationfirstcustombuttomusers');
+                    $firstcustombuttomusersparentnodeseen = true;
+
+                    // Otherwise,
+                    // if we are dealing with custom bottom nodes for admins and this is the first parent node,
+                    // add a special class for later usage in CSS.
+                } else if ($keyprefix == 'localboostnavigationcustombottomadmins' && !$firstcustombuttomadminsparentnodeseen) {
+                    $customnode->add_class('localboostnavigationfirstcustombuttomadmins');
+                    $firstcustombuttomadminsparentnodeseen = true;
                 }
 
                 // Add the custom node to the given navigation_node.
@@ -338,7 +352,7 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
                 // The user preference is to collapse the node.
                 if ($userprefcustomnode == 1) {
                     // Set the node to be collapsed.
-                    $customnode->collapse = true;
+                    $customnode->add_class('localboostnavigationcollapsedparent');
 
                     // The user preference is to expand the node.
                 } else {
@@ -348,50 +362,57 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
                         // regardless of the user preference.
                         if ($accordionalreadyopen == true) {
                             // Set the node to be collapsed.
-                            $customnode->collapse = true;
+                            $customnode->add_class('localboostnavigationcollapsedparent');
                         } else {
-                            // Set the node to be expanded.
-                            $customnode->collapse = false;
-
                             // If we have set this node to be the expanded node, we must remember this fact for the
                             // remaining accordion nodes.
                             $accordionalreadyopen = true;
                         }
-
-                        // If we don't create an accordion, we can respect the user preference in any case.
-                    } else {
-                        // Set the node to be expanded.
-                        $customnode->collapse = false;
                     }
                 }
 
-                // If the code should be collapsed, remove the active status in any case because otherwise it might get highlighted
+                // If the node should be collapsed, remove the active status in any case because otherwise it might get highlighted
                 // as active which does not make sense for collapse parent nodes.
                 if ($collapse) {
                     $customnode->make_inactive();
                 }
 
-                // Finally, if the node shouldn't be collapsed or if it does not have children, set the node icon.
-                if (!$collapse || $customnode->has_children() == false) {
-                    if ($nodeicon instanceof pix_icon) {
-                        $customnode->icon = $nodeicon;
-                    } else {
-                        $customnode->icon = new pix_icon('customnode', '', 'local_boostnavigation');
-                    }
+                // Finally, set the node icon.
+                // This covers the case that the node should not be collapsed
+                // as well as the case that the node should not be collapsed but does not have any children.
+                // Later, when the first child node is added, the node icon might be removed again if the admin told us to do so.
+                if ($nodeicon instanceof pix_icon) {
+                    $customnode->icon = $nodeicon;
+                } else {
+                    $customnode->icon = new pix_icon('customnodexs', '', 'local_boostnavigation');
                 }
 
                 // Otherwise, if it's a child node.
             } else {
                 // If the nodes should be collapsed and collapsing hasn't been prepared yet, prepare collapsing of the parent node.
                 // This is done here (in the first child node and not in the parent node) because parent nodes without any child
-                // node shouldn't be collapsible.
+                // node shouldn't be collapsible and should have an icon in any case.
                 if ($collapse && !$collapselastparentprepared) {
                     // Remember the node key for collapsing.
                     $collapsenodesforjs[] = $lastparentnode->key;
 
-                    // Change the isexpandable attribute for the parent node to true.
-                    $lastparentnode->isexpandable = true;
+                    // Add the localboostnavigationcollapsibleparent class to the parent node.
+                    $lastparentnode->add_class('localboostnavigationcollapsibleparent');
 
+                    // Check if admin really wanted to show an icon in the parent node and indent the parent node.
+                    // Get the relevant customnodeicon config.
+                    $customnodeiconconfig = local_boostnavigation_get_customnodeicon_config($keyprefix, $config);
+                    // Case: LOCAL_BOOSTNAVIGATION_COLLAPSEICON_YES) - Icon and indent is already fine.
+                    // Case: LOCAL_BOOSTNAVIGATION_COLLAPSEICON_JUSTINDENT - Icon has to be removed, but indent is fine.
+                    // Note that the icon is removed by setting it to i/navigationitem which is mapped it fa-fw
+                    // and which is the same as the navigation_node constructor sets if the icon is set to null.
+                    if ($customnodeiconconfig == LOCAL_BOOSTNAVIGATION_COLLAPSEICON_JUSTINDENT) {
+                        $lastparentnode->icon = new pix_icon('i/navigationitem', '');
+                        // Case: LOCAL_BOOSTNAVIGATION_COLLAPSEICON_NONE - Icon and indent have to be removed.
+                    } else if ($customnodeiconconfig == LOCAL_BOOSTNAVIGATION_COLLAPSEICON_NONE) {
+                        $lastparentnode->icon = new pix_icon('i/navigationitem', '');
+                        $lastparentnode->add_class('localboostnavigationcollapsibleparentforcenoindent');
+                    }
                     // Remember that we have prepared collapsing now.
                     $collapselastparentprepared = true;
                 }
@@ -403,8 +424,16 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
                 // And change the parent node directly afterwards.
                 $customnode->set_parent($lastparentnode);
 
-                // Set the hidden attribute according to the collapse state of the last parent node.
-                $customnode->hidden = $lastparentnode->collapse;
+                // If the nodes should be collapsed.
+                if ($collapse) {
+                    // Add the localboostnavigationcollapsiblechild class to the child node.
+                    $customnode->add_class('localboostnavigationcollapsiblechild');
+
+                    // And, but only if the last parent node is collapsed, set the child node to be hidden.
+                    if (in_array('localboostnavigationcollapsedparent', $lastparentnode->classes)) {
+                        $customnode->add_class('localboostnavigationcollapsedchild');
+                    }
+                }
 
                 // For some strange reason, Moodle core does only compare the URL base when searching the active navigation node.
                 // This will result in the wrong node being highlighted if we add multiple nodes which only differ by the URL
@@ -418,7 +447,7 @@ function local_boostnavigation_build_custom_nodes($customnodes, navigation_node 
                 if ($nodeicon instanceof pix_icon) {
                     $customnode->icon = $nodeicon;
                 } else {
-                    $customnode->icon = new pix_icon('customnode', '', 'local_boostnavigation');
+                    $customnode->icon = new pix_icon('customnodexxs', '', 'local_boostnavigation');
                 }
             }
         }
@@ -515,6 +544,9 @@ function local_boostnavigation_build_node_url($url) {
  */
 function local_boostnavigation_build_node_title($title) {
     global $USER, $COURSE, $PAGE;
+
+    // Run the title through the filter processor to especially support multilanguage titles.
+    $title = format_string($title);
 
     // Variable to hold the placeholders as soon as needed.
     static $placeholders = null;
@@ -694,6 +726,7 @@ function local_boostnavigation_customnodesusageusers() {
             get_string('setting_customnodesusagepleasenote', 'local_boostnavigation', null, true).
             '<ul>'.
             '<li>'.get_string('setting_customnodesusagepleasenotepipes', 'local_boostnavigation', null, true).'</li>'.
+            '<li>'.get_string('setting_customnodesusagepleasenotemultilang', 'local_boostnavigation', null, true).'</li>'.
             '<li>'.get_string('setting_customnodesusagepleasenotetitle', 'local_boostnavigation', null, true).'<br />'.
             get_string('setting_customnodesusagepleasenotephexplanation', 'local_boostnavigation', null, true).''.
             get_string('setting_customnodesusagepleasenotephavailable', 'local_boostnavigation', null, true).
@@ -777,6 +810,7 @@ function local_boostnavigation_customnodesusageadmins() {
             get_string('setting_customnodesusagepleasenote', 'local_boostnavigation', null, true).
             '<ul>'.
             '<li>'.get_string('setting_customnodesusageadminsparameternote', 'local_boostnavigation', null, true).'</li>'.
+            '<li>'.get_string('setting_customnodesusagepleasenotemultilang', 'local_boostnavigation', null, true).'</li>'.
             '<li>'.get_string('setting_customnodesusagepleasenotetitle', 'local_boostnavigation', null, true).' '.
             get_string('setting_customnodesusagepleasenotephexplanation', 'local_boostnavigation', null, true).'<br />'.
             get_string('setting_customnodesusagepleasenotephavailable', 'local_boostnavigation', null, true).
@@ -832,108 +866,129 @@ function local_boostnavigation_customnodesusageadmins() {
 
     return $html;
 }
+
 /**
- * Helper function to generate order in which terms need to be sorted
+ * Get the relevant customnodeicon config for a given custom node key prefix.
  *
- * @return string
+ * @param string $customnodekeyprefix
+ * @param mixed $config
+ * @return bool
  */
-function local_boostnavigation_term_order() {
-
-    $month = date("m", time());
-                       
-    //determine which term the node is in
-    if($month >= 1 && $month <= 4){
-        //winter
-        return array("Fall","Spring/Summer","Winter");
-    }elseif($month >= 5 && $month <= 8){
-        //spring/summer
-        return array("Winter","Fall","Spring/Summer");
-    }elseif($month >=9 && $month <= 12){
-        //fall
-        return array("Winter","Spring/Summer","Fall");
+function local_boostnavigation_get_customnodeicon_config($customnodekeyprefix, $config = null) {
+    // Check all possible custom node key prefixes and return the relevant config.
+    if ($customnodekeyprefix == 'localboostnavigationcustomrootusers') {
+        return $config->collapsecustomnodesusersicon;
     }
-}
-/**
- * Helper function to get term based on date passed in
- *
- * @return string
- */
-function local_boostnavigation_get_term($month, $year) {
-
-    if($month >= 1 && $month <= 4){
-       return "Winter ".$year;
-    }elseif($month >= 5 && $month <= 8){
-        return "Spring/Summer ".$year;
-    }elseif($month >=9 && $month <= 12){
-        return "Fall ".$year;
+    if ($customnodekeyprefix == 'localboostnavigationcustomrootadmins') {
+        return $config->collapsecustomnodesadminsicon;
     }
-}
-/**
- * Sorts year and terms into proper order for display
- *
- * @return array
- */
-function local_boostnavigation_sortTerms($terms,$past) {
-
-    if($past){
-
-        //order needs to be backwards inorder to append to mycourses node properly
-       // $order = array("Winter", "Spring/Summer", "Fall");
-        $order = array("Fall", "Spring/Summer", "Winter");
-    
-        usort($terms, function ($a, $b) use ($order) {
-
-            $aparts = explode(" ", $a);
-            $bparts = explode(" ", $b);
-
-
-            if($aparts[1] > $bparts[1]){
-                return 1;
-            }elseif($aparts[1]==$bparts[1]){
-                
-                $pos_a = array_search($aparts[0], $order);
-                $pos_b = array_search($bparts[0], $order);
-
-                return $pos_a - $pos_b;
-            }else{
-                return -1;
-            }
-        });
-        return $terms;
-    }else{
-
-        $order = local_boostnavigation_term_order();
-
-        usort($terms, function ($a, $b) use ($order) {
-
-            $aparts = explode(" ", $a);
-            $bparts = explode(" ", $b);
-
-            if($aparts[1]>$bparts[1]){
-                return -1;
-            }elseif($aparts[1]==$bparts[1]){
-                
-                $pos_a = array_search($aparts[0], $order);
-                $pos_b = array_search($bparts[0], $order);
-
-                return $pos_a - $pos_b;
-            }
-            else{
-                return 1;
-            }
-        });
-        return $terms;
+    if ($customnodekeyprefix == 'localboostnavigationcustomcourseusers') {
+        return $config->collapsecustomcoursenodesusersicon;
     }
+    if ($customnodekeyprefix == 'localboostnavigationcustomcourseadmins') {
+        return $config->collapsecustomcoursenodesadminsicon;
+    }
+    if ($customnodekeyprefix == 'localboostnavigationcustombottomusers') {
+        return $config->collapsecustombottomnodesusersicon;
+    }
+    if ($customnodekeyprefix == 'localboostnavigationcustombottomadmins') {
+        return $config->collapsecustombottomnodesadminsicon;
+    }
+
+    // As a fallback, which should not happen, return the default setting of the configs.
+    return LOCAL_BOOSTNAVIGATION_COLLAPSEICON_NONE;
 }
 
-
-
-
-
-
-
-
-
-
-
-
+    /**
+     * Helper function to generate order in which terms need to be sorted
+     *
+     * @return string
+     */
+    function local_boostnavigation_term_order() {
+        
+        $month = date("m", time());
+        
+        //determine which term the node is in
+        if($month >= 1 && $month <= 4){
+            //winter
+            return array("Fall","Spring/Summer","Winter");
+        }elseif($month >= 5 && $month <= 8){
+            //spring/summer
+            return array("Winter","Fall","Spring/Summer");
+        }elseif($month >=9 && $month <= 12){
+            //fall
+            return array("Winter","Spring/Summer","Fall");
+        }
+    }
+    /**
+     * Helper function to get term based on date passed in
+     *
+     * @return string
+     */
+    function local_boostnavigation_get_term($month, $year) {
+        
+        if($month >= 1 && $month <= 4){
+            return "Winter ".$year;
+        }elseif($month >= 5 && $month <= 8){
+            return "Spring/Summer ".$year;
+        }elseif($month >=9 && $month <= 12){
+            return "Fall ".$year;
+        }
+    }
+    /**
+     * Sorts year and terms into proper order for display
+     *
+     * @return array
+     */
+    function local_boostnavigation_sortTerms($terms,$past) {
+        
+        if($past){
+            
+            //order needs to be backwards inorder to append to mycourses node properly
+            // $order = array("Winter", "Spring/Summer", "Fall");
+            $order = array("Fall", "Spring/Summer", "Winter");
+            
+            usort($terms, function ($a, $b) use ($order) {
+                  
+                  $aparts = explode(" ", $a);
+                  $bparts = explode(" ", $b);
+                  
+                  
+                  if($aparts[1] > $bparts[1]){
+                  return 1;
+                  }elseif($aparts[1]==$bparts[1]){
+                  
+                  $pos_a = array_search($aparts[0], $order);
+                  $pos_b = array_search($bparts[0], $order);
+                  
+                  return $pos_a - $pos_b;
+                  }else{
+                  return -1;
+                  }
+                  });
+            return $terms;
+        }else{
+            
+            $order = local_boostnavigation_term_order();
+            
+            usort($terms, function ($a, $b) use ($order) {
+                  
+                  $aparts = explode(" ", $a);
+                  $bparts = explode(" ", $b);
+                  
+                  if($aparts[1]>$bparts[1]){
+                  return -1;
+                  }elseif($aparts[1]==$bparts[1]){
+                  
+                  $pos_a = array_search($aparts[0], $order);
+                  $pos_b = array_search($bparts[0], $order);
+                  
+                  return $pos_a - $pos_b;
+                  }
+                  else{
+                  return 1;
+                  }
+                  });
+            return $terms;
+        }
+    }

@@ -17,6 +17,7 @@
  * Local plugin "Boost navigation fumbling" - JS code for collapsing nav drawer nodes
  *
  * @package    local_boostnavigation
+ * @copyright  2017 Alexander Bias, Ulm University <alexander.bias@uni-ulm.de>
  * @copyright  2017 Kathrin Osswald, Ulm University <kathrin.osswald@uni-ulm.de>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -66,7 +67,8 @@ define(['jquery'], function($) {
      * @param {string} nodename The nav node's nodename.
      */
     function collapseNode(node, nodename) {
-        // Set the hidden attribute to true for all elements which have the nodename as their data-parent-key attribute.
+        // Set the hidden attribute to true for all elements which have the nodename as their data-parent-key
+        // attribute.
         $('.list-group-item[data-parent-key=' + nodename + ']').attr("data-hidden", "1");
         // Change the collapse attribute of the node itself to true.
         node.attr("data-collapse", "1");
@@ -82,7 +84,8 @@ define(['jquery'], function($) {
      * @param {string} nodename The nav node's nodename.
      */
     function expandNode(node, nodename) {
-        // Set the hidden attribute to false for all elements which have the nodename as their data-parent-key attribute.
+        // Set the hidden attribute to false for all elements which have the nodename as their data-parent-key
+        // attribute.
         $('.list-group-item[data-parent-key=' + nodename + ']').attr("data-hidden", "0");
         // Change the collapse attribute of the node itself to false.
         node.attr("data-collapse", "0");
@@ -166,7 +169,6 @@ define(['jquery'], function($) {
     function initToggleNodes(nodename) {
         // Search node to be collapsible.
         var node = $('.list-group-item[data-key="' + nodename + '"]');
-
 
         // Add a click handler to this node.
         toggleClickHandler(node, nodename);
