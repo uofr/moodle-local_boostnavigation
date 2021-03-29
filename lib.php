@@ -47,6 +47,9 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
     // Include local library.
     require_once(__DIR__ . '/locallib.php');
 
+      // Include theme local library for categories.
+    require_once($CFG->dirroot . "/theme/urcourses_default/locallib.php");
+    
     // Check if admin wanted us to remove the myhome node from Boost's nav drawer.
     // We have to check explicitely if the configurations are set because this function will already be
     // called at installation time and would then throw PHP notices otherwise.
@@ -90,6 +93,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
     // Check if admin wanted us to remove the mycourses node from Boost's nav drawer.
     if (isset($config->removemycoursesnode) && $config->removemycoursesnode == true) {
+
         // If yes, do it.
         if ($mycoursesnode) {
             // Hide mycourses node.
@@ -216,7 +220,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
         if ((isset($config->modifymycoursesrootnodefilterhint) && $config->modifymycoursesrootnodefilterhint == true) ||
             (isset($config->modifymycoursesrootnodeshowfiltered) && $config->modifymycoursesrootnodeshowfiltered == true &&
                 isset($config->modifymycoursesrootnodefilterlink) && $config->modifymycoursesrootnodefilterlink == true)) {
-            // If yes, do it.
+                    // If yes, do it.
             if ($mycoursesnode) {
                 // Do only if I am enrolled in at least one course.
                 if (count($mycourseschildrennodeskeys) > 0) {
@@ -293,6 +297,114 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                 }
             }
         }
+
+        ///ADDED for New Feature
+        // Check if admin wanted us to add new features to mycourse node
+        if (isset($config->newfeaturesmycoursenode) && $config->newfeaturesmycoursenode == true) {
+
+            // If yes, do it.
+            if ($mycoursesnode) {
+
+                //if no semester set just leave nodes as is.
+                if (isset($config->currentsem)){
+
+                    $currentterm = local_boostnavigation_semester_string($config->currentsem);
+                    $pastterm = strtotime("-4 months", time());
+                    $ongoingdate = 946706400; //Jan 01, 2000 set date for ongoing courses
+
+                    $courses = enrol_get_all_users_courses($USER->id, true, array('enddate'));
+                    $currentnodes=[];
+                    $pastnodes=[];
+                    $pterms=[];
+                    $cterms=[];
+                    $ongoingnodes =[];
+                    $ogterms=[];
+
+                    $filteredcoursesids = array_map(
+                        function ($course) {
+                            return $course->id;
+                        }, $courses);
+
+                    foreach ($courses as $course) {
+
+                        $temp = $course;
+                        $temp->term = local_boostnavigation_get_term($temp->startdate,$temp->enddate);
+
+                        //check if course is starting in the future
+                        if(time() < $temp->startdate){
+                            $temp->future ="true";
+                        }
+                            
+                        $temp->action =  new moodle_url($CFG->wwwroot.'/course/view.php?id='.$course->id);
+                        $url =  new moodle_url($CFG->wwwroot.'/course/view.php?id='.$course->id);
+
+                        $temp->key = $course->id;
+                        $temp->isexpandable = false;
+                        $temp->get_indent = 1;
+                        $temp->collapse= false;
+                        $temp->parent= array("key"=>"mycourses");
+                        $temp->icon= array("pix"=>true);
+                        $temp->cssclass = theme_urcourses_default_get_ur_category_class($course->id).' added';
+
+                        //if student and course is hidden direct to summary
+                        $temp->text = $temp->shortname;
+                        $context = context_course::instance($course->id);
+
+                        if (!has_capability('moodle/course:viewhiddencourses', $context) && !$course->visible) {
+                            $url = new moodle_url($CFG->wwwroot.'/?redirect=0#summary-'.$course->id);
+                        }
+                        $temp->url = $url->__toString();
+
+                        if($course->visible ==0 ){
+                            $temp->visible =false;
+                        }else{
+                            $temp->visible =true;
+                        }
+                    
+                        //if continuing course date it set
+                        if($ongoingdate == $temp->startdate){
+                            $temp->ongoing ="true";
+                            $ongoingnodes[]=$temp;
+                        }
+                        //if end date is set 
+                        else if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
+                            if (!in_array($temp->term, $pterms)) {
+                                $pterms[]=$temp->term;  
+                            }
+                            $pastnodes[] = $temp;
+                        }else if(($temp->enddate  == 0 || !isset($temp->enddate))&& $temp->startdate < $pastterm ){
+                            //if there is no end date and startdate is greater then four month
+                            //place in past year
+                            if (!in_array($temp->term, $pterms)) {
+                                $pterms[]=$temp->term;  
+                            }
+                            $pastnodes[] = $temp;
+                        }else if($temp->enddate > time() && $temp->startdate <= $pastterm){
+                            //if enddate is in future, but startdate is in past term place in current term.
+                            $temp->term = $currentterm;
+                            if (!in_array($temp->term, $cterms)) {
+                                $cterms[]=$temp->term;
+                             }
+                            $currentnodes[]=$temp;
+                        }else{
+                            if (!in_array($temp->term, $cterms)) {
+                                $cterms[]=$temp->term;
+                            }
+                            $currentnodes[]=$temp;
+                        } 
+                    }
+                if(!empty($currentnodes) || !empty($pastnodes) || !empty($ongoingnodes) ){
+
+                        $cterms = local_boostnavigation_sortTerms($cterms,false);
+                        $pterms = local_boostnavigation_sortTerms($pterms,true);
+
+                        //will overwrite current node
+                    $PAGE->requires->js_call_amd('local_boostnavigation/mycoursesoveride', 'init',[$currentnodes,$cterms,$pastnodes,$pterms, $ongoingnodes]);
+                    }
+                }
+            }
+        }
+        //END OF ADDED
 
         // Check if admin wanted us to collapse the mycourses node.
         // We won't support the setting navshowmycoursecategories in this feature as this would have complicated the feature's

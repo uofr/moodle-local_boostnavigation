@@ -38,6 +38,13 @@ if ($hassiteconfig) {
 
     // Create empty settings page structure to make the site administration work on non-admin pages.
     if (!$ADMIN->fulltree) {
+
+        /*ADDED for UR Courses */
+        // Settings page: Semester
+        $page = new admin_settingpage('local_boostnavigation_currentsem',
+              get_string('settingspage_currentsem', 'local_boostnavigation', null, true));
+        $ADMIN->add('local_boostnavigation', $page);
+        /*END OF ADDED */
         // Settings page: Root nodes.
         $page = new admin_settingpage('local_boostnavigation_rootnodes',
                 get_string('settingspage_rootnodes', 'local_boostnavigation', null, true));
@@ -83,7 +90,31 @@ if ($hassiteconfig) {
             LOCAL_BOOSTNAVIGATION_COLLAPSEICON_YES => get_string('setting_collapsenodeicon_yes', 'local_boostnavigation'),
         );
 
+        //ADDED for UR Courses
         // Settings page: Root nodes.
+        $page = new admin_settingpage('local_boostnavigation_currentsem',
+                get_string('settingspage_currentsem', 'local_boostnavigation', null, true));// Settings page: Root nodes.
+
+     
+    
+
+        $setting = new admin_setting_configtext('local_boostnavigation/currentsem', get_string('setting_currentsem','local_boostnavigation'), 
+        get_string('setting_currentsem_desc', 'local_boostnavigation'), 'none', PARAM_NOTAGS, 50);                                                               
+                                                 
+        // We are using tabs, so add this to page. If we were not using tabs this would be $settings->add($setting);
+        $page->add($setting);
+
+
+        $page->add(new admin_setting_configcheckbox('local_boostnavigation/newfeaturesmycoursenode',
+                get_string('setting_newfeaturesmycoursenode', 'local_boostnavigation'),
+                get_string('setting_newfeaturesmycoursenode_desc', 'local_boostnavigation'),
+                0));
+
+        // Add settings page to the admin settings category.
+        $ADMIN->add('local_boostnavigation', $page);
+
+        //END of ADDED
+
         $page = new admin_settingpage('local_boostnavigation_rootnodes',
                 get_string('settingspage_rootnodes', 'local_boostnavigation', null, true));
 
@@ -468,10 +499,8 @@ if ($hassiteconfig) {
                 'local_boostnavigation/removemycoursesnode', 'checked');
         $page->hide_if('local_boostnavigation/collapsemycoursesnodesession',
                 'local_boostnavigation/collapsemycoursesnode', 'notchecked');
-
         // Add settings page to the admin settings category.
         $ADMIN->add('local_boostnavigation', $page);
-
 
 
         // Settings page: Custom root nodes.

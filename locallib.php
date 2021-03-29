@@ -997,3 +997,129 @@ function local_boostnavigation_get_customfield_valuestring($customfieldname, $cu
     // Return the string.
     return $customfieldstring;
 }
+/**
+ * Helper function to generate order in which terms need to be sorted
+ *
+ * @return string
+ */
+function local_boostnavigation_term_order() {
+
+    $month = date("m", time());
+                       
+    //determine which term the node is in
+    if($month >= 1 && $month <= 4){
+        //winter
+        return array("Fall","Spring/Summer","Winter");
+    }elseif($month >= 5 && $month <= 8){
+        //spring/summer
+        return array("Winter","Fall","Spring/Summer");
+    }elseif($month >=9 && $month <= 12){
+        //fall
+        return array("Winter","Spring/Summer","Fall");
+    }
+}
+/**
+ * Helper function to get term based on date passed in
+ *
+ * @return string
+ */
+function local_boostnavigation_get_term($startdate, $enddate) {
+
+    $year = date("Y", $startdate);
+    $smonth = date("m", $startdate);
+    $emonth= 0;
+    if(isset($enddate)){
+        $emonth = date("m", $enddate);
+    }
+
+    //compare start and end dates to determine semester
+    if(($smonth >= 1 && $emonth <= 4) || ($emonth==0 && $smonth >= 1 && $smonth <= 4)){
+        return "Winter ".$year;
+    }elseif(($smonth >= 4 && $emonth <= 8)||($emonth==0 &&$smonth >= 4 && $smonth <= 8)){
+        return "Spring/Summer ".$year;
+    }elseif(($smonth >=8 && $emonth <= 12)||($emonth==0 && $smonth >=8 && $smonth <= 12 )){
+        return "Fall ".$year;
+    }else{
+       //final catch incase spanning multiple months
+       if(($smonth >= 1 && $smonth <= 4)){
+            return "Winter ".$year;
+        }elseif(($smonth >= 4 && $smonth <= 8)){
+            return "Spring/Summer ".$year;
+        }elseif(($smonth >=8 && $smonth <= 12)){
+            return "Fall ".$year;
+        }
+    }
+}
+/**
+ * Sorts year and terms into proper order for display
+ *
+ * @return array
+ */
+function local_boostnavigation_sortTerms($terms,$past) {
+
+    if($past){
+        //order needs to be backwards inorder to append to mycourses node properly
+       // $order = array("Winter", "Spring/Summer", "Fall");
+        $order = array("Fall", "Spring/Summer", "Winter");
+    
+        usort($terms, function ($a, $b) use ($order) {
+
+            $aparts = explode(" ", $a);
+            $bparts = explode(" ", $b);
+
+            if($aparts[1] > $bparts[1]){
+                return 1;
+            }elseif($aparts[1]==$bparts[1]){
+                
+                $pos_a = array_search($aparts[0], $order);
+                $pos_b = array_search($bparts[0], $order);
+
+                return $pos_a - $pos_b;
+            }else{
+                return -1;
+            }
+        });
+        return $terms;
+    }else{
+
+        $order = local_boostnavigation_term_order();
+
+        usort($terms, function ($a, $b) use ($order) {
+
+            $aparts = explode(" ", $a);
+            $bparts = explode(" ", $b);
+
+            if($aparts[1]>$bparts[1]){
+                return -1;
+            }elseif($aparts[1]==$bparts[1]){
+                
+                $pos_a = array_search($aparts[0], $order);
+                $pos_b = array_search($bparts[0], $order);
+
+                return $pos_a - $pos_b;
+            }
+            else{
+                return 1;
+            }
+        });
+        return $terms;
+    }
+}
+/**
+ * Converts given date in yyyytt format into label
+ *
+ * @return array
+ */
+function local_boostnavigation_semester_string($semester) {
+    $year = substr($semester, 0, 4);
+    $term = substr($semester, 4, 2);
+
+    //compare start and end dates to determine semester
+    if($term == 10){
+        return "Winter ".$year;
+    }elseif($term == 20){
+        return "Spring/Summer ".$year;
+    }elseif($term == 30){
+        return "Fall ".$year;
+    }
+}
