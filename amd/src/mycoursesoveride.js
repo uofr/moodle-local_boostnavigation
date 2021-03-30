@@ -282,12 +282,7 @@ define(
             //add term header
             var past = $('.list-group-item[data-key="mycoursespast"]');
 
-            console.log("NODES0");
-            console.log(pastnodes);
             createHeaders(pterms,past,true).then(function(){
-
-                console.log("NODES0c");
-                console.log(pastnodes);
                 //add in nodes under label
                 fillPastNode(pastnodes);
             });
@@ -302,8 +297,6 @@ define(
 
         var term ="";
 
-        console.log("NODES");
-        console.log(nodes);
         for(var i=0; i<nodes.length; i++){
 
             //used for fomating the new section
@@ -323,8 +316,6 @@ define(
                     var termnode = termnodes[j];
                 }
             }
-
-            console.log(termnode);
             createNode(termnode, nodes[i]);
         }
 
@@ -378,7 +369,6 @@ define(
      */
     function createHeaders(terms,node,past) {
 
-        console.log("Test1");
         var all = function(array){
             var deferred = $.Deferred();
             var fulfilled = 0, length = array.length;
@@ -401,9 +391,6 @@ define(
             return deferred.promise();
         };
 
-        console.log("Test2");
-        console.log(terms);
-
         var promises = [];
 
 
@@ -414,8 +401,6 @@ define(
             headerarray['parent_key']="mycourses";
             headerarray['get_indent']=1;
 
-            console.log("test2b");
-            console.log(term);
             var split = term.split(" ");
             if(split[0]=="Spring/Summer"){
                 headerarray["Spring"]="true";
@@ -436,7 +421,6 @@ define(
             });
         });
 
-        console.log("Test3");
         return $.when(all(promises)).then(function(results) {
             return results;
         });
@@ -449,9 +433,6 @@ define(
             nodes.remove();
 
             var node = $('.list-group-item[data-key="mycourses"]');
-
-            console.log("NODES0");
-            console.log(pastNodes);
 
             if(pastNodes.length >0){
                 createPastNode(node, sortByKeyDesc(pastNodes,"term","text"),pterms);
