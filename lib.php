@@ -225,8 +225,11 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $currentyear = date("Y", time());
                         $ongoingdate = 946706400; //Jan 01, 2000 set date for ongoing courses
 
-                        $currentterm = local_boostnavigation_get_term($currentmonth, $currentyear);
-                        $temp->term = local_boostnavigation_get_term($month, $year);
+                        //$currentterm = local_boostnavigation_get_term($currentmonth, $currentyear);
+                        //$temp->term = local_boostnavigation_get_term($month, $year);
+
+                        $currentterm = local_boostnavigation_get_term(time(), 0);
+                        $temp->term = local_boostnavigation_get_term($temp->startdate,$temp->enddate);
 
                         //check if course is starting in the future
                         if(time() < $course->startdate){

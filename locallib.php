@@ -920,19 +920,36 @@ function local_boostnavigation_get_customnodeicon_config($customnodekeyprefix, $
             return array("Winter","Spring/Summer","Fall");
         }
     }
-    /**
+   /**
      * Helper function to get term based on date passed in
      *
      * @return string
      */
-    function local_boostnavigation_get_term($month, $year) {
-        
-        if($month >= 1 && $month <= 4){
+    function local_boostnavigation_get_term($startdate, $enddate) {
+
+        $year = date("Y", $startdate);
+        $smonth = date("m", $startdate);
+        $emonth= 0;
+        if(isset($enddate)){
+            $emonth = date("m", $enddate);
+        }
+
+        //compare start and end dates to determine semester
+        if(($smonth >= 1 && $emonth <= 4) || ($emonth==0 && $smonth >= 1 && $smonth <= 4)){
             return "Winter ".$year;
-        }elseif($month >= 5 && $month <= 8){
+        }elseif(($smonth >= 4 && $emonth <= 8)||($emonth==0 &&$smonth >= 4 && $smonth <= 8)){
             return "Spring/Summer ".$year;
-        }elseif($month >=9 && $month <= 12){
+        }elseif(($smonth >=8 && $emonth <= 12)||($emonth==0 && $smonth >=8 && $smonth <= 12 )){
             return "Fall ".$year;
+        }else{
+        //final catch incase spanning multiple months
+        if(($smonth >= 1 && $smonth <= 4)){
+                return "Winter ".$year;
+            }elseif(($smonth >= 4 && $smonth <= 8)){
+                return "Spring/Summer ".$year;
+            }elseif(($smonth >=8 && $smonth <= 12)){
+                return "Fall ".$year;
+            }
         }
     }
     /**
