@@ -43,7 +43,6 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
     // Include local library.
     require_once(__DIR__ . '/locallib.php');
 	
-
     // Include theme local library for categories.
 	require_once($CFG->dirroot . "/theme/urcourses_default/locallib.php");
 
@@ -90,6 +89,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
     // Check if admin wanted us to remove the mycourses node from Boost's nav drawer.
     if (isset($config->removemycoursesnode) && $config->removemycoursesnode == true) {
+
         // If yes, do it.
         if ($mycoursesnode) {
             // Hide mycourses node.
@@ -195,8 +195,11 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
 
             $mycoursesnode->add_class('localboostnavigationcollapsibleparent');
             $mycoursesnode->icon = new pix_icon('i/navigationitem', '');
-
-
+            $pastterm = strtotime("-4 months", time());
+            $currentmonth =date("m", time());
+            $currentyear = date("Y", time());
+            $ongoingdate = 946706400; //Jan 01, 2000 set date for ongoing courses
+            $currentterm = local_boostnavigation_get_term(time(), 0);
             $courses = enrol_get_all_users_courses($USER->id, true, array('enddate'));
             $currentnodes=[];
             $pastnodes=[];
@@ -205,109 +208,79 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
             $ongoingnodes =[];
             $ogterms=[];
 
-            foreach ($mycourseschildrennodeskeys as $k) {
-                //Not a great way to get the info we need
-                //Will need to think of a better way to fetch and input the info whille keeping the 
-                //node structure
-                foreach($courses as $course){
-                    //if courses match together
-                    if($course->id == $k){
-         
-                        $temp = $mycoursesnode->get($k);
-                        //add start and end info into the node
-                        $temp->enddate= $course->enddate;
-                        $temp->startdate =$course->startdate;
+            $filteredcoursesids = array_map(
+                function ($course) {
+                    return $course->id;
+                }, $courses);
 
-                        $year = date("Y", $course->startdate);
-                        $month = date("m", $course->startdate);
-                        $pastterm = strtotime("-4 months", time());
-                        $currentmonth =date("m", time());
-                        $currentyear = date("Y", time());
-                        $ongoingdate = 946706400; //Jan 01, 2000 set date for ongoing courses
+            foreach ($courses as $course) {
+               
+                $temp = $course;
+                $temp->term = local_boostnavigation_get_term($temp->startdate,$temp->enddate);
 
-                        //$currentterm = local_boostnavigation_get_term($currentmonth, $currentyear);
-                        //$temp->term = local_boostnavigation_get_term($month, $year);
-
-                        $currentterm = local_boostnavigation_get_term(time(), 0);
-                        $temp->term = local_boostnavigation_get_term($temp->startdate,$temp->enddate);
-
-                        //check if course is starting in the future
-                        if(time() < $course->startdate){
-                            $temp->future ="true";
-                        }
-                        
-                        //check user roles in the course
-                        $context = context_course::instance($course->id);
-                        $userroles = $DB->get_records('role_assignments', array('contextid' => $context->id,'userid' => $USER->id));
-                        
-                        // find highest/lowest role 5 -student,4 noneditteacher, 3-editteacher, 2 coursecreator, 1 manager
-                        $roleid = 0;
-                        foreach ($userroles as $userrole) {
-                            $chkid = $userrole->roleid;
-                            if ($chkid > 0) {
-                                if ($roleid > 0) {
-                                    if ($chkid < $roleid) {
-                                        $roleid = $chkid;
-                                    }
-                                } else {
-                                    //get the first role
-                                    $roleid = $chkid;
-                                }
-                            }
-                        }
-                        
-                        $url = new moodle_url($temp->action);
-
-                        if ($roleid == 5 && $course->visible == 0) {
-                            //$temp->noaccess ="true";
-                            $url = new moodle_url($CFG->wwwroot.'/?redirect=0#summary-'.$course->id);
-                        }
-                        
-                        $temp->url = $url->__toString();
-
-                        if($course->visible ==0 ){
-                            $temp->visible ="false";
-                        }
-
-                        //if continuing course date it set
-                        if($ongoingdate == $temp->startdate){
-                            $temp->ongoing ="true";
-                            $ongoingnodes[]=$temp;
-                        }
-                        //if end date is set 
-                        else if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
-
-                            if (!in_array($temp->term, $pterms)) {
-                                $pterms[]=$temp->term;  
-                            }
-                            $pastnodes[] = $temp;
-                        }else if(($temp->enddate  == 0 || !isset($temp->enddate))&& $temp->startdate < $pastterm ){
-                            //if there is no end date and startdate is greater then four month
-                            //place in past year
-
-                            if (!in_array($temp->term, $pterms)) {
-                                $pterms[]=$temp->term;  
-                            }
-                            $pastnodes[] = $temp;
-
-                        }else if($temp->enddate > time() && $temp->startdate <= $pastterm){
-                        
-                            //if enddate is in future, but startdate is in past term place in current term.
-                            $temp->term = $currentterm;
-                            if (!in_array($temp->term, $cterms)) {
-                                $cterms[]=$temp->term;
-                            }
-                            $currentnodes[]=$temp;
-                        }else{
-                            if (!in_array($temp->term, $cterms)) {
-                                $cterms[]=$temp->term;
-                            }
-                            $currentnodes[]=$temp;
-                        }
-                    }  
+                //check if course is starting in the future
+                if(time() < $temp->startdate){
+                    $temp->future ="true";
                 }
-            }
 
+                $temp->action =  new moodle_url($CFG->wwwroot.'/course/view.php?id='.$course->id);
+                $url =  new moodle_url($CFG->wwwroot.'/course/view.php?id='.$course->id);
+
+                $temp->key = $course->id;
+                $temp->isexpandable = false;
+                $temp->get_indent = 1;
+                $temp->collapse= false;
+                $temp->parent= array("key"=>"mycourses");
+                $temp->icon= array("pix"=>true);
+                $temp->cssclass = theme_urcourses_default_get_ur_category_class($course->id).' added';
+
+                //if student and course is hidden direct to summary
+                $temp->text = $temp->shortname;
+                $context = context_course::instance($course->id);
+
+                if (!has_capability('moodle/course:viewhiddencourses', $context) && !$course->visible) {
+                    $url = new moodle_url($CFG->wwwroot.'/?redirect=0#summary-'.$course->id);
+                }
+                $temp->url = $url->__toString();
+
+                if($course->visible ==0 ){
+                    $temp->visible =false;
+                }else{
+                    $temp->visible =true;
+                }
+
+                //if continuing course date it set
+                if($ongoingdate == $temp->startdate){
+                    $temp->ongoing ="true";
+                    $ongoingnodes[]=$temp;
+                }
+                //if end date is set 
+                else if($temp->enddate  != 0 && isset($temp->enddate) && $temp->enddate < time() ){
+                    if (!in_array($temp->term, $pterms)) {
+                        $pterms[]=$temp->term;  
+                    }
+                    $pastnodes[] = $temp;
+                }else if(($temp->enddate  == 0 || !isset($temp->enddate))&& $temp->startdate < $pastterm ){
+                //if there is no end date and startdate is greater then four month
+                //place in past year
+                    if (!in_array($temp->term, $pterms)) {
+                        $pterms[]=$temp->term;  
+                    }
+                    $pastnodes[] = $temp;
+                }else if($temp->enddate > time() && $temp->startdate <= $pastterm){
+                //if enddate is in future, but startdate is in past term place in current term.
+                    $temp->term = $currentterm;
+                    if (!in_array($temp->term, $cterms)) {
+                        $cterms[]=$temp->term;
+                    }
+                    $currentnodes[]=$temp;
+                }else{
+                    if (!in_array($temp->term, $cterms)) {
+                        $cterms[]=$temp->term;
+                    }
+                    $currentnodes[]=$temp;
+                }
+            }   
            if(!empty($currentnodes) || !empty($pastnodes) || !empty($ongoingnodes) ){
         
                 $cterms = local_boostnavigation_sortTerms($cterms,false);

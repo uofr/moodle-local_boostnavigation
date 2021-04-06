@@ -58,7 +58,7 @@
 
 
     {{#action}}
-    <a class="list-group-item list-group-item-action {{#isactive}}active{{/isactive}}  {{#future}}urhiddendash{{/future}}  "  {{^noaccess}} href="{{url}}" {{/noaccess}} data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" {{#past}}data-past = "true" {{/past}} {{#parent.key}}data-parent-key="{{.}}"{{/parent.key}}>
+    <a class="list-group-item list-group-item-action {{#isactive}}active{{/isactive}}  {{^visible}}urhiddendash{{/visible}}  "  {{^noaccess}} href="{{url}}" {{/noaccess}} data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" {{#past}}data-past = "true" {{/past}} {{#parent.key}}data-parent-key="{{.}}"{{/parent.key}}>
         <div class="m-l-{{get_indent}}">
             <div class="media">
             {{#icon.pix}}
@@ -76,6 +76,9 @@
 							{{#past}}
                             <i class="fa fa-calendar-o" aria-hidden="true"></i>
 							{{/past}}
+                            {{^past}}
+                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+						{{/past}}
                         {{/future}}
                 {{/visible}}
                 {{#visible}}
@@ -84,7 +87,7 @@
                       {{/future}}
                       {{^future}}
 						{{^past}}
-                        <i class="fa fa-eye-slash" aria-hidden="true"></i>
+                        <i class="fa fa-eye" aria-hidden="true"></i>
 						{{/past}}
 						{{#past}}
                           <i class="fa fa-calendar-o" aria-hidden="true"></i>
@@ -96,35 +99,35 @@
     </a>
     {{/action}}
      {{^action}}
-        {{#header}}
-            {{#ongoing}}
-                <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{key}}" >
-                </div>
-            {{/ongoing}}
-            {{^ongoing}}
-                <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
-                    <small class="m-l-{{get_indent}}">
-                    {{text}}
-                    </small>
-                </div>
-            {{/ongoing}}
+     {{#header}}
+        {{#ongoing}}
+             <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{key}}" >
+             </div>
+        {{/ongoing}}
+        {{^ongoing}}
+             <div class="list-group-item p-1 navbar-light {{#Fall}}alert-warning {{/Fall}}   {{#Spring}}alert-success {{/Spring}} {{#Winter}}alert-info{{/Winter}}" data-hidden="{{hidden}}" data-parent-key="{{parent_key}}" data-key="{{text}}" {{#past}}data-past = "true" {{/past}}  {{^past}}data-past=false{{/past}} >
+                <small class="m-l-{{get_indent}}">
+                {{text}}
+                </small>
+            </div>
+        {{/ongoing}}
 
-        {{/header}}
-        {{^header}}
-            <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-parent-key="{{parent}}" >
-            </div>
-            <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
-                <div class="m-l-0">
-                    <div class="media ">
-                        {{#icon.pix}}
-                        <span class="media-left">
-                            {{#pix}}{{{icon.pix}}}, {{{icon.component}}}, {{{icon.alt}}}{{/pix}}
-                        </span>
-                        {{/icon.pix}}
-                        <span class="media-body d-flex justify-content-between">{{{text}}}  <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"></i> </span>
-                    </div>
+    {{/header}}
+    {{^header}}
+    <div class="list-group-item navbar-light alert-dark" style="padding: 2px 0 0" data-parent-key="{{parent}}" >
+        </div>
+        <div class="list-group-item" data-key="{{key}}" data-isexpandable="{{isexpandable}}" data-indent="{{get_indent}}" data-showdivider="{{showdivider}}" data-type="{{type}}" data-nodetype="{{nodetype}}" data-collapse="{{collapse}}" data-forceopen="{{forceopen}}" data-isactive="{{isactive}}" data-hidden="{{hidden}}" data-preceedwithhr="{{preceedwithhr}}" data-parent-key="{{parent}}">
+            <div class="m-l-0">
+                <div class="media">
+                    {{#icon.pix}}
+                    <span class="media-left">
+                        {{#pix}}{{{icon.pix}}}, {{{icon.component}}}, {{{icon.alt}}}{{/pix}}
+                    </span>
+                    {{/icon.pix}}
+                    <span class="media-body">{{{text}}}  <i class="icon fa fa-caret-right fa-fw " aria-hidden="true"></i> </span>
                 </div>
             </div>
-        {{/header}}
+        </div>
+    {{/header}}
     {{/action}}
 
