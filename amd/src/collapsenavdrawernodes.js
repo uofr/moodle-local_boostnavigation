@@ -78,8 +78,9 @@ define(['jquery'], function($) {
         M.util.set_user_preference('local_boostnavigation-collapse_' + nodename + 'node', 1);
         //for activites change arrow direction
         if(nodename == "localboostnavigationactivities"){
-            $(node).find(".fa-angle-down").addClass("fa-angle-right");
-            $(node).find(".fa-angle-right").removeClass("fa-angle-down");
+            $(node).removeClass("boostnavigation_bold");
+            $(node).find(".fa-caret-down").addClass("fa-caret-right");
+            $(node).find(".fa-caret-right").removeClass("fa-caret-down");
         }
      }
 
@@ -100,8 +101,9 @@ define(['jquery'], function($) {
         M.util.set_user_preference('local_boostnavigation-collapse_' + nodename + 'node', 0);
         //for activites change arrow direction
         if(nodename == "localboostnavigationactivities"){
-            $(node).find(".fa-angle-right").addClass("fa-angle-down");
-            $(node).find(".fa-angle-down").removeClass("fa-angle-right");
+            $(node).addClass("boostnavigation_bold");
+            $(node).find(".fa-caret-right").addClass("fa-caret-down");
+            $(node).find(".fa-caret-down").removeClass("fa-caret-right");
         }
     }
 
@@ -194,11 +196,12 @@ define(['jquery'], function($) {
         //make activities arrow start out correctly
         if(nodename == "localboostnavigationactivities"){
             if($(node).hasClass("localboostnavigationcollapsedparent")){
-                $(node).find(".fa-angle-down").addClass("fa-angle-right");
-                $(node).find(".fa-angle-right").removeClass("fa-angle-down");
+                $(node).find(".fa-angle-down").addClass("fa-caret-right");
+                $(node).find(".fa-caret-right").removeClass("fa-angle-down");
             }else{
-                $(node).find(".fa-angle-right").addClass("fa-angle-down");
-                $(node).find(".fa-angle-down").removeClass("fa-angle-right");
+                $(node).addClass("boostnavigation_bold");
+                $(node).find(".fa-angle-right").addClass("fa-caret-down");
+                $(node).find(".fa-caret-down").removeClass("fa-angle-right");
             }
         }
     }
@@ -215,6 +218,8 @@ define(['jquery'], function($) {
 
     return {
         init: function(toggleNodes, accordionNodes) {
+            //add some styling to sitehome
+            $("[data-key='home']").addClass("boostnavigation_shadow");
             // Initialize toggle nodes.
             for (var i = 0, tLen = toggleNodes.length; i < tLen; i++) {
                 initToggleNodes(toggleNodes[i]);

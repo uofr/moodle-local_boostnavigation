@@ -208,3 +208,12 @@
     display: none;
 }
 
+/*Bold class for open toogles*/
+.boostnavigation_bold{
+    font-weight: bold;
+}
+
+.boostnavigation_shadow{
+    border-top: 2px solid #ced4da !important;
+    border-bottom: 3px solid #ced4da !important;
+}
