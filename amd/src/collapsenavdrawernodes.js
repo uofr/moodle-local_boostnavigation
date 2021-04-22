@@ -76,6 +76,11 @@ define(['jquery'], function($) {
         node.attr("aria-expanded", "0");
         // Save this state to the user preferences.
         M.util.set_user_preference('local_boostnavigation-collapse_' + nodename + 'node', 1);
+        //for activites change arrow direction
+        if(nodename == "localboostnavigationactivities"){
+            $(node).find(".fa-angle-down").addClass("fa-angle-right");
+            $(node).find(".fa-angle-right").removeClass("fa-angle-down");
+        }
      }
 
     /**
@@ -93,6 +98,11 @@ define(['jquery'], function($) {
         node.attr("aria-expanded", "1");
         // Save this state to the user preferences.
         M.util.set_user_preference('local_boostnavigation-collapse_' + nodename + 'node', 0);
+        //for activites change arrow direction
+        if(nodename == "localboostnavigationactivities"){
+            $(node).find(".fa-angle-right").addClass("fa-angle-down");
+            $(node).find(".fa-angle-down").removeClass("fa-angle-right");
+        }
     }
 
     /**
@@ -179,6 +189,17 @@ define(['jquery'], function($) {
         // Make the mycourses node accessible (all other nodes are fine).
         if (nodename == 'mycourses') {
             tabbableDiv(node);
+        }
+
+        //make activities arrow start out correctly
+        if(nodename == "localboostnavigationactivities"){
+            if($(node).hasClass("localboostnavigationcollapsedparent")){
+                $(node).find(".fa-angle-down").addClass("fa-angle-right");
+                $(node).find(".fa-angle-right").removeClass("fa-angle-down");
+            }else{
+                $(node).find(".fa-angle-right").addClass("fa-angle-down");
+                $(node).find(".fa-angle-down").removeClass("fa-angle-right");
+            }
         }
     }
 
