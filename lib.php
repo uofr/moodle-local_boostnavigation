@@ -351,7 +351,7 @@ function local_boostnavigation_extend_navigation(global_navigation $navigation) 
                         $context = context_course::instance($course->id);
 
                         if (!has_capability('moodle/course:viewhiddencourses', $context) && !$course->visible) {
-                            $url = new moodle_url($CFG->wwwroot.'/?redirect=0#summary-'.$course->id);
+                            $url = new moodle_url($CFG->wwwroot.'/my/?redirect=0#summary-'.$course->id); // Link target: Dashboard.
                         }
                         $temp->url = $url->__toString();
 
